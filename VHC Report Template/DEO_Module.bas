@@ -50,6 +50,11 @@ Sub CopyDown(table As ListObject, numRows As Variant)
     
     ' ListRows(-1) to keep it in bounds; .Offset(1) to insert the row below
     table.ListRows(oldBtmRowNum - 1).Range.Offset(1).Insert
+
+    ' Will always be in bounds so no need ListRows(-1); .Range(1) to select the first col of that row instead of the whole row
+    ' Optional in most cases
+    table.ListRows(oldBtmRowNum).Range(1).PasteSpecial Paste:=xlPasteFormats
+
     Application.CutCopyMode = False
 
     Dim firstRangeToHide As Range
