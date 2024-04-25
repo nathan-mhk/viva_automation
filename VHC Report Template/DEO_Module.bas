@@ -94,6 +94,23 @@ Sub ModifyDatesAndHide(tblName As String, numRows As Variant)
     
 End Sub
 
+Sub UpdateFormatting(tblName As String)
+    Application.ScreenUpdating = False
+    
+    Dim table As ListObject
+    Dim rng As Range
+    
+    Set table = ActiveSheet.ListObjects(tblName)
+    
+    Set rng = table.Range
+    
+    rng.FormatConditions.Delete
+    
+    rng.FormatConditions.Add(Type:=xlExpression, Formula1:="=INDIRECT(""" & tblName & "[@Date]"")=MAX(INDIRECT(""" & tblName & "[Date]""))-1").Interior.Color = RGB(255, 255, 0)
+    
+    Application.ScreenUpdating = True
+End Sub
+
 Sub ProdCpy()
 '
 ' ProdCpy Macro
@@ -101,6 +118,7 @@ Sub ProdCpy()
 ' Keyboard Shortcut: Ctrl+Shift+X
 '
     Cpy PROD_SHEET_NAME, PROD_TABLE_NAME, PROD_NUM_ROWS
+    UpdateFormatting PROD_TABLE_NAME
     
 End Sub
 
@@ -121,6 +139,7 @@ Sub AssemCpy()
 ' Keyboard Shortcut: Ctrl+Shift+C
 
     Cpy ASSEM_SHEET_NAME, ASSEM_TABLE_NAME, ASSEM_NUM_ROWS
+    UpdateFormatting ASSEM_TABLE_NAME
     
 End Sub
 
