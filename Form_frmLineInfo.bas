@@ -956,7 +956,7 @@ Public Sub AutoRead_Click()
     
     
             strvar = "UPDATE ProductionLineStatus SET CounterStart = CounterStop"
-            strvar = strvar & ", ShiftNo='" & strShift & "', ProductionDate='" & Date & "'"
+            strvar = strvar & ", ShiftNo='" & strShift & "', ProductionDate='" & IIF(intHour = 3, Date - 1, Date) & "'"
             DoCmd.SetWarnings False
             DoCmd.RunSQL strvar
             Debug.Print (Now & "    " & strvar)
