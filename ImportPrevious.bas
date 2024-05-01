@@ -82,12 +82,29 @@ End Sub
 Public Function ImportPreviousRun()
     ImportPrevious "Custom Full", "CustomFull"
     
-'    ' Sunday = 1, Saturday = 7
-'    If Weekday(Date) = 2 Then
-'        Debug.Print (Now & "    Monday. Running Wknd")
-'        ImportPrevious "Wknd Full", "WkndFull"    ' Run this on Monday
-'    Else
-'        Debug.Print (Now & "    Tuesday-Friday. Running Yst")
-'        ImportPrevious "Yst Full", "YstFull"        ' Run this on Tue-Fri
-'    End If
+    Dim dateVal, dateStr, sqlStr As String
+    Dim diff As Integer
+        
+    ' Sunday = 1, Saturday = 7
+    If Weekday(Date) = 2 Then
+        ' Monday
+        diff = -3
+        dateStr = " >= "
+    Else
+        ' Tuesday - Friday
+        diff = -1
+        dateStr = " = "
+    End If
+    
+    dateStr = dateStr & "#" & Format(Date + diff, "yyyy-mm-dd") & "#"
+    
+    sqlStr = "UPDATE ProductionLineStatusHistory SET ProductionLineStatusHistory.LineStatus = ""Running"" "
+    sqlStr = sqlStr & "WHERE (((ProductionLineStatusHistory.ShiftCounter)>0) AND ((ProductionLineStatusHistory.ProductionDate)" & dateStr & "))"
+    
+    DoCmd.SetWarnings False
+    
+    Debug.Print (sqlStr)
+    DoCmd.RunSQL sqlStr
+    
+    DoCmd.SetWarnings True
 End Function
