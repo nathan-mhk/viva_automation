@@ -50,7 +50,7 @@ if %tgtMonth% lss 10 set tgtMonth=0%tgtMonth%
 @REM For each `productType`, copy the file into "C:\Users\User\Downloads\DailyReport"
 for %%i in (0 1 2 3 4) do (
   set "productType=!productTypes[%%i]!"
-  set sourceFile=S:\Productions\wendy\Finch !productType! Report\%tgtYear%\Finch !productType! Report %tgtYear%-%tgtMonth%.xlsm
+  set sourceFile=Path\To\File\Finch !productType! Report\%tgtYear%\Finch !productType! Report %tgtYear%-%tgtMonth%.xlsm
   @REM echo %sourceFile%
   copy /y "!sourceFile!" "!destinationFolder!"
 )

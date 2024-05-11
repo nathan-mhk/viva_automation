@@ -24,7 +24,7 @@ tgtMonth = Right("00" & Month(tgtDate), 2)
 ' WScript.Echo tgtYear & "-" & tgtMonth
 
 For Each productType In productTypes
-    sourceFile = "S:\Productions\wendy\Finch " & productType & " Report\" & tgtYear & "\Finch " & productType & " Report " & tgtYear & "-" & tgtMonth & ".xlsm"
+    sourceFile = "Path\To\File\Finch " & productType & " Report\" & tgtYear & "\Finch " & productType & " Report " & tgtYear & "-" & tgtMonth & ".xlsm"
     ' WScript.Echo sourceFile
     fso.CopyFile sourceFile, destinationFolder
 Next ' productType
