@@ -71,6 +71,3 @@ Public Function RefreshLineDetails()
     DoCmd.SetWarnings True
 
 End Function
-
-
-

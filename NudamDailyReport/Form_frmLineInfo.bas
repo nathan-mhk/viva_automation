@@ -939,6 +939,11 @@ Public Sub AutoRead_Click()
         strShift = "Shift" & intHour
 
         If strShift <> LineStatusData.Column(3) Then
+        
+            Dim fileNum As Integer
+            'fileNum = FreeFile
+            'Open "C:\Users\Nudam\Desktop\shiftChange.log" For Append As #fileNum
+            
             Debug.Print (Now & "    Shift Changed")
             ' ShiftChange_Click
     
@@ -946,6 +951,8 @@ Public Sub AutoRead_Click()
             DoCmd.SetWarnings False
             DoCmd.RunSQL strvar
             Debug.Print (Now & "    " & strvar)
+            
+            'Print #fileNum, Now & "    " & strvar
             TimerDelay (1)
     
             strvar = "INSERT INTO ProductionLineStatusHistory SELECT ProductionDate, ProductionLineNo, ShiftNO, "
@@ -956,10 +963,14 @@ Public Sub AutoRead_Click()
     
     
             strvar = "UPDATE ProductionLineStatus SET CounterStart = CounterStop"
-            strvar = strvar & ", ShiftNo='" & strShift & "', ProductionDate='" & IIF(intHour = 3, Date - 1, Date) & "'"
+            strvar = strvar & ", ShiftNo='" & strShift & "', ProductionDate='" & IIf(intHour = 3, Date - 1, Date) & "'"
             DoCmd.SetWarnings False
             DoCmd.RunSQL strvar
             Debug.Print (Now & "    " & strvar)
+            
+            'Print #fileNum, Now & "    " & strvar
+            
+            'Close #fileNum
 
             ctlList.Requery
         End If
@@ -1012,7 +1023,7 @@ Public Sub AutoRead_Click()
                         Debug.Print (Now & "    [" & LineStatusData.Column(2) & "] " & strvar)
                         
                         strvar = "INSERT INTO Productionlog (ProductionDate, ProductionLineNo, PollingRetry, ReadItem, ReadResult)"
-                        strvar = strvar & "VALUES ('" & Now & "','" & LineStatusData.Column(2)
+                        strvar = strvar & "VALUES ('" & IIf(intHour = 3, Now - 1, Now) & "','" & LineStatusData.Column(2)
                         strvar = strvar & "', '" & intRetryCounter & "', 'Counter', '" & strIdentifier & "')"
                         DoCmd.SetWarnings False
                         DoCmd.RunSQL strvar, 0
@@ -1036,7 +1047,7 @@ Public Sub AutoRead_Click()
                 Debug.Print (Now & "    [" & LineStatusData.Column(2) & "] " & strvar)
                 
                 strvar = "INSERT INTO ProductionLog (ProductionDate, ProductionLineNo, PollingRetry, ReadItem, ReadResult)"
-                strvar = strvar & "VALUES ('" & Now & "', '" & LineStatusData.Column(2)
+                strvar = strvar & "VALUES ('" & IIf(intHour = 3, Now - 1, Now) & "', '" & LineStatusData.Column(2)
                 strvar = strvar & "', '" & intRetryCounter & "', 'Counter', '" & strIdentifier & "')"
                 DoCmd.SetWarnings False
                 DoCmd.RunSQL strvar, 0
@@ -1077,7 +1088,7 @@ Public Sub AutoRead_Click()
                         Debug.Print (Now & "    [" & LineStatusData.Column(2) & "] " & strvar)
                         
                         strvar = "INSERT INTO ProductionLog (ProductionDate, ProductionLineNo, PollingRetry, ReadItem, ReadResult)"
-                        strvar = strvar & " VALUES ('" & Now & "', '" & LineStatusData.Column(2)
+                        strvar = strvar & " VALUES ('" & IIf(intHour = 3, Now - 1, Now) & "', '" & LineStatusData.Column(2)
                         strvar = strvar & "', '" & intRetryCounter & "', 'CycleTime', '" & strIdentifier & "')"
                         DoCmd.SetWarnings False
                         DoCmd.RunSQL strvar, 0
@@ -1095,7 +1106,7 @@ Public Sub AutoRead_Click()
                 Forms![frmlineinfo]![CycleTimeVal] = "ERR"
 
                 strvar = "INSERT INTO ProductionLog (ProductionDate, ProductionLineNo, PollingRetry, ReadItem, ReadResult)"
-                strvar = strvar & " VALUES ('" & Now & "', '" & LineStatusData.Column(2)
+                strvar = strvar & " VALUES ('" & IIf(intHour = 3, Now - 1, Now) & "', '" & LineStatusData.Column(2)
                 strvar = strvar & "', '" & intRetryCounter & "', 'CycleTime', '" & strIdentifier & "')"
                 DoCmd.SetWarnings False
                 DoCmd.RunSQL strvar, 0
@@ -1297,7 +1308,7 @@ Private Sub ShiftChange_Click()
     DoCmd.RunSQL strvar, 0
     
     strvar = "UPDATE ProductionLineStatus SET CounterStart = CounterStop"
-    strvar = strvar & ", ShiftNo='" & strShift & "', ProductionDate='" & Date & "'"
+    strvar = strvar & ", ShiftNo='" & strShift & "', ProductionDate='" & IIf(strShift = "3", Date - 1, Date) & "'"
     DoCmd.SetWarnings False
     DoCmd.RunSQL strvar, 0
 End Sub
@@ -1317,5 +1328,3 @@ Private Function CheckNumeric(strTemp As String)
         End If
     Next
 End Function
-
-
