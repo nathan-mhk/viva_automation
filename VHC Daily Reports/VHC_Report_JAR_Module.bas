@@ -2,11 +2,11 @@ Option Explicit
 
 Const PROD_SHEET_NAME As String = "Production"
 Const PROD_TABLE_NAME As String = "Prod"
-Const PROD_NUM_ROWS As Variant = 15
+Const PROD_NUM_ROWS As Variant = 7
 
-Const ASSEM_SHEET_NAME As String = "Assembly (DEO)"
-Const ASSEM_TABLE_NAME As String = "Assem"
-Const ASSEM_NUM_ROWS As Variant = 9
+Const HTL_SHEET_NAME As String = "HTL"
+Const HTL_TABLE_NAME As String = "HTL"
+Const HTL_NUM_ROWS As Variant = 6
 
 Function ModifyDates(table As ListObject, numRows As Variant) As Range
 
@@ -50,11 +50,6 @@ Sub CopyDown(table As ListObject, numRows As Variant)
     
     ' ListRows(-1) to keep it in bounds; .Offset(1) to insert the row below
     table.ListRows(oldBtmRowNum - 1).Range.Offset(1).Insert
-
-    ' Will always be in bounds so no need ListRows(-1); .Range(1) to select the first col of that row instead of the whole row
-    ' Optional in most cases
-    table.ListRows(oldBtmRowNum).Range(1).PasteSpecial Paste:=xlPasteFormats
-
     Application.CutCopyMode = False
 
     Dim firstRangeToHide As Range
@@ -80,6 +75,23 @@ Sub CopyDown(table As ListObject, numRows As Variant)
 
 End Sub
 
+Sub UpdateFormatting(tblName As String)
+    Application.ScreenUpdating = False
+    
+    Dim table As ListObject
+    Dim rng As Range
+    
+    Set table = ActiveSheet.ListObjects(tblName)
+    
+    Set rng = table.Range
+    
+    rng.FormatConditions.Delete
+    
+    rng.FormatConditions.Add(Type:=xlExpression, Formula1:="=INDIRECT(""" & tblName & "[@Date]"")=MAX(INDIRECT(""" & tblName & "[Date]""))-1").Interior.Color = RGB(255, 255, 0)
+    
+    Application.ScreenUpdating = True
+End Sub
+
 Sub Cpy(wsName As String, tblName As String, numRows As Variant)
 
     Sheets(wsName).Select
@@ -97,23 +109,6 @@ Sub ModifyDatesAndHide(tblName As String, numRows As Variant)
     
     Application.ScreenUpdating = True
     
-End Sub
-
-Sub UpdateFormatting(tblName As String)
-    Application.ScreenUpdating = False
-    
-    Dim table As ListObject
-    Dim rng As Range
-    
-    Set table = ActiveSheet.ListObjects(tblName)
-    
-    Set rng = table.Range
-    
-    rng.FormatConditions.Delete
-    
-    rng.FormatConditions.Add(Type:=xlExpression, Formula1:="=INDIRECT(""" & tblName & "[@Date]"")=MAX(INDIRECT(""" & tblName & "[Date]""))-1").Interior.Color = RGB(255, 255, 0)
-    
-    Application.ScreenUpdating = True
 End Sub
 
 Sub ProdCpy()
@@ -137,33 +132,110 @@ Sub ProdModifyDatesAndHide()
     
 End Sub
 
-Sub AssemCpy()
+Sub HTLCpy()
 '
-' AssemCpy Macro
+' HTLCpy Macro
 '
 ' Keyboard Shortcut: Ctrl+Shift+C
 
-    Cpy ASSEM_SHEET_NAME, ASSEM_TABLE_NAME, ASSEM_NUM_ROWS
-    UpdateFormatting ASSEM_TABLE_NAME
+    Cpy HTL_SHEET_NAME, HTL_TABLE_NAME, HTL_NUM_ROWS
+    UpdateFormatting HTL_TABLE_NAME
     
 End Sub
 
-Sub AssemModifyDatesAndHide()
+Sub HTLModifyDatesAndHide()
 '
-' AssemModifyDatesAndHide Macro
+' HTLModifyDatesAndHide Macro
 '
 ' Keyboard Shortcut: Ctrl+Shift+D
 
-    ModifyDatesAndHide ASSEM_TABLE_NAME, ASSEM_NUM_ROWS
+    ModifyDatesAndHide HTL_TABLE_NAME, HTL_NUM_ROWS
     
 End Sub
 
-Sub RefreshAll()
-'
-' RefreshAll Macro
-' Keyboard Shortcut: Ctrl+Shift+R
+Sub ExpandCollapseDate(ptName As String, cbName As String)
+
     Application.ScreenUpdating = False
+    
+    Dim expand As Boolean
+    expand = ActiveSheet.CheckBoxes(cbName).Value > 0
+    
+    ActiveSheet.PivotTables(ptName).PivotFields("Date").ShowDetail = expand
+    
+    Application.ScreenUpdating = True
+    
+End Sub
+
+Sub Grp(ptName As String, byDay As Boolean)
+
+    Application.ScreenUpdating = False
+    
+    On Error Resume Next
+
+    Dim dateCell As Range
+    Dim pt As PivotTable
+    
+    Set pt = ActiveSheet.PivotTables(ptName)
+    
+    pt.RowRange.Cells(2, 1).Select
+    
+    If byDay Then
+        Selection.Ungroup
+    Else
+        ' Group by 7 days instead as there's no group by week option
+        Selection.Group Start:=True, End:=True, By:=7, Periods:=Array(False, _
+            False, False, True, False, False, False)
+    End If
+    
+    Application.ScreenUpdating = False
+    
+End Sub
+
+Sub ProdCB()
+    ' ProductionCheckbox
+    ExpandCollapseDate "ProdDayWk", "ProdExpand"
+End Sub
+
+Sub ProdOpt(byDay As Boolean)
+    ' Production Option (Daily, Weekly)
+    Grp "ProdDayWk", byDay
+    
+    ' By default, rows will be expanded after ungrouping.
+    ' Need to fold rows depends on the state of the checkbox
+    ProdCB
+End Sub
+
+Sub HTLCB()
+    ' HTLCheckbox
+    ExpandCollapseDate "HTLDayWk", "HTLExpand"
+End Sub
+
+Sub HTLOpt(byDay As Boolean)
+    ' HTL Option (Daily, Weekly)
+    Grp "HTLDayWk", byDay
+    
+    ' By default, rows will be expanded after ungrouping.
+    ' Need to fold rows depends on the state of the checkbox
+    HTLCB
+End Sub
+
+Sub RefreshAllClpsDate()
+'
+' RefreshAllClpsDate Macro
+'
+' Keyboard Shortcut: Ctrl+Shift+R
+'
+    Application.ScreenUpdating = False
+    
     ActiveWorkbook.RefreshAll
+    
+    ' ExpandCollapseDate uses ActiveSheet, so need to manually select the corresponding sheets
+    Sheets("Production Summary").Select
+    ProdCB
+    
+    Sheets("HTL Summary").Select
+    HTLCB
+    
     Application.ScreenUpdating = True
     
 End Sub
@@ -174,16 +246,44 @@ Sub RefilterDate(pvTable As PivotTable, pvFilterType As XlPivotFilterType)
     
     Set pvField = pvTable.PivotFields("Date")
     pvField.ClearAllFilters
-    pvField.PivotFilters.Add Type:=pvFilterType, Value1:=Format(Date - 2, "yyyy-mm-dd")
+    pvField.PivotFilters.Add Type:=pvFilterType, Value1:=Format(Date - 1, "yyyy-mm-dd")
+    
+End Sub
+
+Sub RefilterMold(pvTable As PivotTable, moldName As String)
+
+    Dim pvField As PivotField
+    
+    Set pvField = pvTable.PivotFields("MoldNo")
+    pvField.ClearAllFilters
+    pvField.PivotFilters.Add Type:=xlCaptionContains, Value1:=moldName
     
 End Sub
 
 Sub RefilterGraph()
-'
-' Keyboard Shortchut: Ctrl+Shift+G
+
+    ' Keyboard Shortchut: Ctrl+Shift+G
     Application.ScreenUpdating = False
     
     Dim pvTable As PivotTable
+    Dim pvField As PivotField
+    
+    Sheets("Production Summary").Select
+    Set pvTable = ActiveSheet.PivotTables("FiftyPT")
+    pvTable.RefreshTable
+    RefilterDate pvTable, xlSpecificDate
+    RefilterMold pvTable, "50"
+    
+    Sheets("HTL Summary").Select
+    Set pvTable = ActiveSheet.PivotTables("SevenPT")
+    pvTable.RefreshTable
+    RefilterDate pvTable, xlSpecificDate
+    RefilterMold pvTable, "7"
+    
+    Set pvTable = ActiveSheet.PivotTables("FourteenPT")
+    pvTable.RefreshTable
+    RefilterDate pvTable, xlSpecificDate
+    RefilterMold pvTable, "14"
     
     Sheets("Graph Summary").Select
     Set pvTable = ActiveSheet.PivotTables("FnlAssemSum")
