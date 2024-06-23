@@ -10,4 +10,4 @@
    - For cycle time, if the values in column `CycleTime` were correct, replace the value in column `NewCycle` with -1
 
 3. Save the changes made on the table `ManAdjust`, then run the macro `ApplyManualAdjustment`. A message "Manual Adjustments Applied" should pops up after the changes were applied to the DB.
-    > Query `UnpivotManAdj` unpivots the table `ManAdjust`, which is used by the query `customFullView`. Query `customFullView` was used to create the table `CustomFull`, which was when used by `updateFromCustomFull` to apply the changes
+    > Query `UnpivotManAdj` unpivots the table `ManAdjust`, which is used by the query `customFullView`. Query `customFullView` was used to create the table `CustomFull`, which was when used by `updateFromCustomFull` to apply the changes.
