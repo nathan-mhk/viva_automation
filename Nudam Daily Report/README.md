@@ -9,8 +9,10 @@ The Microsoft Access database is designed to exit every 20 minutes. A task was s
 
 `RefreshLineDetails.bas` were executed every time the Access database was launched, to ensure the production line details on the database matches the information on the actual machine.
 
-Due to hardware limitations, some values of the shift-counter has to be manually adjusted. Adjustments were made in `Manual Update.xlsm`, and changes are applied back to the database using `importPrevious.bas`, to ensure a single source of truth.
+Due to hardware limitations, some values of the shift-counter has to be manually adjusted. Adjustments and changes are all made and applied respectively within the Access database.
 
 `ExportDaily.bas` were executed once every hour to generate a daily report that consolidates the production metrics of the previous day and the current shift.
 
 Update 2024-05-10: As an improvement to suit the needs and requirements for the current state of the workflow, `ExportDaily.bas` and the Power Queries inside `Finch Plant Daily Production Summary.xlsx` can now handle the report generation of specific dates.
+
+Update 2024-06-23: To improve the overall efficiency of data entry, modifications, and verifications, the use and functionalities of `ManualUpdate.xlsm` were refactored & integrated into various SQL queries and macros within the Access database.
